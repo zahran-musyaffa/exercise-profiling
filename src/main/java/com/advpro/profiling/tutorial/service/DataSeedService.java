@@ -10,7 +10,6 @@ import com.github.javafaker.Faker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -29,12 +28,11 @@ public class DataSeedService {
     @Autowired
     private StudentCourseRepository studentCourseRepository;
 
-    private static final int NUMBER_OF_STUDENTS = 500;
+    private static final int NUMBER_OF_STUDENTS = 100;
     private static final int NUMBER_OF_COURSE = 5;
 
     public void seedStudent() {
         Faker faker = new Faker(new Locale("in-ID"));
-        List<Student> studentsToSave = new ArrayList<>(); // Create a list to hold the data
 
         for (int i = 0; i < NUMBER_OF_STUDENTS; i++) {
             Student student = new Student();
@@ -43,32 +41,25 @@ public class DataSeedService {
             student.setFaculty(faker.educator().course());
             student.setGpa(faker.number().randomDouble(2, 2, 4));
 
-            studentsToSave.add(student); // Add to list instead of saving immediately
+            studentRepository.save(student);
         }
-
-        studentRepository.saveAll(studentsToSave); // Save everything at once
     }
 
     public void seedCourse() {
         Faker faker = new Faker(new Locale("in-ID"));
-        List<Course> coursesToSave = new ArrayList<>();
-
         for (int i = 0; i < NUMBER_OF_COURSE; i++) {
             Course course = new Course();
             course.setCourseCode(faker.code().ean8());
             course.setName(faker.book().title());
             course.setDescription(faker.lorem().sentence());
 
-            coursesToSave.add(course);
+            courseRepository.save(course);
         }
-
-        courseRepository.saveAll(coursesToSave); // Save everything at once
     }
 
     public void seedStudentCourses() {
         List<Student> students = studentRepository.findAll();
         List<Course> courses = courseRepository.findAll();
-        List<StudentCourse> studentCoursesToSave = new ArrayList<>(); // Create a list
 
         for (Student student : students) {
             List<Course> selectedCourses = new Random().ints(0, courses.size())
@@ -79,10 +70,10 @@ public class DataSeedService {
 
             for (Course course : selectedCourses) {
                 StudentCourse studentCourse = new StudentCourse(student, course);
-                studentCoursesToSave.add(studentCourse); // Add to list
+                studentCourseRepository.save(studentCourse);
             }
         }
 
-        studentCourseRepository.saveAll(studentCoursesToSave); // Save everything at once
     }
+
 }
